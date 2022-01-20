@@ -16,9 +16,9 @@ cmake_minimum_required(VERSION 3.2)
 project(BaikalDB C CXX)
 
 option(WITH_BAIKAL_CLIENT "build baikal-client" ON)
-option(DEBUG "Print debug logs" OFF)
-option(WITH_SYSTEM_LIBS "use system installed headers and libraries instead of auto dependency" OFF)
-option(WITH_DEBUG_SYMBOLS "With debug symbols" OFF)
+option(DEBUG "Print debug logs" ON)
+option(WITH_SYSTEM_LIBS "use system installed headers and libraries instead of auto dependency" ON)
+option(WITH_DEBUG_SYMBOLS "With debug symbols" ON)
 option(WITH_TESTS "With tests" OFF)
 option(WITH_GPERF "Link tcmalloc and profiler" ON)
 
@@ -122,11 +122,11 @@ endif ()
 #croaring
 if (WITH_SYSTEM_LIBS)
     find_path(CROARING_INCLUDE_DIR NAMES roaring/roaring.h)
-    find_library(CROARING_LIBRARIES NAMES croaring)
+    find_library(CROARING_LIBRARIES NAMES roaring)
     if ((NOT CROARING_INCLUDE_DIR) OR (NOT CROARING_LIBRARIES))
-        message(FATAL_ERROR "Fail to find croaring")
+        message(FATAL_ERROR "Fail to find roaring")
     endif ()
-    ADD_LIBRARY(croaring SHARED IMPORTED GLOBAL)
+    ADD_LIBRARY(roaring SHARED IMPORTED GLOBAL)
 else ()
     include(croaring)
 endif ()
@@ -180,7 +180,7 @@ else ()
 endif ()
 
 #protobuf
-include(protobuf)
+# include(protobuf)
 
 #rocksdb
 if (WITH_SYSTEM_LIBS)
@@ -207,6 +207,7 @@ if (WITH_SYSTEM_LIBS)
     if ((NOT BRPC_INCLUDE_DIR) OR (NOT BRPC_LIBRARIES))
         message(FATAL_ERROR "Fail to find brpc")
     endif ()
+    ADD_LIBRARY(brpc SHARED IMPORTED GLOBAL)
 else ()
     include(leveldb)
     include(brpc)
@@ -220,6 +221,7 @@ if (WITH_SYSTEM_LIBS)
     if ((NOT BRAFT_INCLUDE_DIR) OR (NOT BRAFT_LIBRARIES))
         message(FATAL_ERROR "Fail to find braft")
     endif ()
+    ADD_LIBRARY(braft SHARED IMPORTED GLOBAL)
 else ()
     include(braft)
 endif ()
@@ -259,6 +261,8 @@ endif ()
 
 message(CUR_DIR : ${CMAKE_CURRENT_BINARY_DIR}, SRC_DIR : ${CMAKE_SOURCE_DIR})
 
+find_package(Protobuf)
+find_library(PROTOBUF_LIBRARIES NAMES protobuf)
 file(GLOB PROTO_FILES ${CMAKE_SOURCE_DIR}/proto/*.proto)
 message("protoc: ${PROTOBUF_PROTOC_EXECUTABLE}, proto inc: ${PROTOBUF_INCLUDE_DIRS}, lib: ${PROTOBUF_LIBRARIES}, ${PROTOBUF_PROTOC_LIBRARY}, protos: ${PROTO_FILES}")
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/proto)
@@ -268,14 +272,15 @@ foreach (PROTO ${PROTO_FILES})
     string(REPLACE ".proto" "" PROTO_WE ${PROTO_WE})
     list(APPEND PROTO_HDRS "${CMAKE_CURRENT_BINARY_DIR}/proto/${PROTO_WE}.pb.h")
     list(APPEND PROTO_SRCS "${CMAKE_CURRENT_BINARY_DIR}/proto/${PROTO_WE}.pb.cc")
-    add_custom_command(
-            OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/proto/${PROTO_WE}.pb.h ${CMAKE_CURRENT_BINARY_DIR}/proto/${PROTO_WE}.pb.cc
-            COMMAND ${PROTOBUF_PROTOC_EXECUTABLE}
-            --cpp_out=${CMAKE_CURRENT_BINARY_DIR}/proto
-            --proto_path=${PROTOBUF_INCLUDE_DIR}
-            --proto_path=${CMAKE_SOURCE_DIR}/proto ${PROTO}
-            DEPENDS protobuf
-    )
+    # add_custom_command(
+    #         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/proto/${PROTO_WE}.pb.h ${CMAKE_CURRENT_BINARY_DIR}/proto/${PROTO_WE}.pb.cc
+    #         COMMAND ${PROTOBUF_PROTOC_EXECUTABLE}
+    #         --cpp_out=${CMAKE_CURRENT_BINARY_DIR}/proto
+    #         --proto_path=${PROTOBUF_INCLUDE_DIR}
+    #         --proto_path=${CMAKE_SOURCE_DIR}/proto ${PROTO}
+    #         DEPENDS protobuf
+    # )
+    execute_process(COMMAND ${PROTOBUF_PROTOC_EXECUTABLE} --cpp_out=${CMAKE_CURRENT_BINARY_DIR}/proto --proto_path=${CMAKE_SOURCE_DIR}/proto ${PROTO})
 endforeach ()
 add_library(PROTO_OBJS OBJECT ${PROTO_SRCS} ${PROTO_HDRS})
 message("protoc: ${PROTOBUF_PROTOC_EXECUTABLE}, proto srcs : ${PROTO_SRCS}")
@@ -443,7 +448,7 @@ file(GLOB COMMON
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/output/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/output/bin)
 
-set(COMMON_DEPS ssl crypto zlib boost rapidjson arrow croaring glog gflags protobuf re2 snappy rocksdb brpc braft)
+set(COMMON_DEPS ssl crypto zlib boost rapidjson arrow roaring glog gflags re2 snappy rocksdb brpc braft)
 if (WITH_GPERF)
     set(COMMON_DEPS ${COMMON_DEPS} gperf)
 endif ()
