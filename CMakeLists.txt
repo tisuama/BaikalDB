@@ -88,7 +88,7 @@ endif ()
 if (WITH_SYSTEM_LIBS)
     SET(Boost_NO_BOOST_CMAKE 1)
     SET(Boost_USE_MULTITHREADED ON)
-    SET(Boost_USE_STATIC_LIBS ON)
+    SET(Boost_USE_STATIC_LIBS OFF)
     find_package(Boost 1.56.0 REQUIRED thread filesystem)
     ADD_LIBRARY(boost SHARED IMPORTED GLOBAL)
 else ()
@@ -203,7 +203,7 @@ if (WITH_SYSTEM_LIBS)
     endif ()
 
     find_path(BRPC_INCLUDE_DIR NAMES brpc/server.h)
-    find_library(BRPC_LIBRARIES NAMES libbrpc.a brpc)
+    find_library(BRPC_LIBRARIES NAMES brpc)
     if ((NOT BRPC_INCLUDE_DIR) OR (NOT BRPC_LIBRARIES))
         message(FATAL_ERROR "Fail to find brpc")
     endif ()
@@ -217,7 +217,7 @@ message(BRPC:${BRPC_INCLUDE_DIR}, ${BRPC_LIBRARIES})
 #braft
 if (WITH_SYSTEM_LIBS)
     find_path(BRAFT_INCLUDE_DIR NAMES braft/raft.h)
-    find_library(BRAFT_LIBRARIES NAMES libbraft.a brpc)
+    find_library(BRAFT_LIBRARIES NAMES braft)
     if ((NOT BRAFT_INCLUDE_DIR) OR (NOT BRAFT_LIBRARIES))
         message(FATAL_ERROR "Fail to find braft")
     endif ()
@@ -307,7 +307,7 @@ SET(DEP_INC
         ${CROARING_INCLUDE_DIR}
         ${RAPIDJSON_INCLUDE_DIR}
 
-        ${PROTOBUF_INCLUDE_DIR}
+        # ${PROTOBUF_INCLUDE_DIR}
         ${GFLAGS_INCLUDE_DIR}
         ${GLOG_INCLUDE_DIR}
         ${SNAPPY_INCLUDE_DIR}
@@ -453,7 +453,7 @@ if (WITH_GPERF)
     set(COMMON_DEPS ${COMMON_DEPS} gperf)
 endif ()
 
-add_library(common STATIC ${COMMON} $<TARGET_OBJECTS:PROTO_OBJS>)
+add_library(common SHARED ${COMMON} $<TARGET_OBJECTS:PROTO_OBJS>)
 add_dependencies(common ${COMMON_DEPS})
 target_include_directories(common PUBLIC ${COMMON_INC})
 
