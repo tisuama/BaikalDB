@@ -196,7 +196,7 @@ endif ()
 
 #brpc
 if (WITH_SYSTEM_LIBS)
-    #leveldb(for brpc)
+    # leveldb(for brpc)
     find_library(LEVELDB_LIBRARIES NAMES leveldb)
     if (NOT LEVELDB_LIBRARIES)
         message(FATAL_ERROR "Fail to find leveldb")
@@ -282,7 +282,7 @@ foreach (PROTO ${PROTO_FILES})
     # )
     execute_process(COMMAND ${PROTOBUF_PROTOC_EXECUTABLE} --cpp_out=${CMAKE_CURRENT_BINARY_DIR}/proto --proto_path=${CMAKE_SOURCE_DIR}/proto ${PROTO})
 endforeach ()
-add_library(PROTO_OBJS OBJECT ${PROTO_SRCS} ${PROTO_HDRS})
+add_library(PROTO_OBJS OBJECT ${PROTO_SRCS}  ${PROTO_HDRS})
 message("protoc: ${PROTOBUF_PROTOC_EXECUTABLE}, proto srcs : ${PROTO_SRCS}")
 
 #sql parser
@@ -394,7 +394,7 @@ file(GLOB LOGICAL_PLAN src/logical_plan/*.cpp)
 file(GLOB MEM_ROW src/mem_row/*.cpp)
 file(GLOB PHYSICAL_PLAN src/physical_plan/*.cpp)
 file(GLOB PROTOCOL src/protocol/*.cpp)
-list(REMOVE_ITEM PROTOCOL src/protocol/main.cpp)
+list(REMOVE_ITEM PROTOCOL ${CMAKE_CURRENT_SOURCE_DIR}/src/protocol/main.cpp)
 file(GLOB RAFT src/raft/*.cpp)
 file(GLOB RAFT_META src/raft_meta/*.cpp)
 file(GLOB REVERSE src/reverse/*.cpp)
@@ -402,7 +402,7 @@ file(GLOB RUNTIME src/runtime/*.cpp)
 file(GLOB SESSION src/session/*.cpp)
 file(GLOB SQLPARSER include/sqlparser/*.cc ${CMAKE_CURRENT_BINARY_DIR}/sqlparser/*.cc)
 file(GLOB STORE src/store/*.cpp)
-list(REMOVE_ITEM STORE src/store/main.cpp)
+list(REMOVE_ITEM STORE ${CMAKE_CURRENT_SOURCE_DIR}/src/store/main.cpp)
 
 set(COMMON_INC
         ${DEP_INC}
@@ -427,7 +427,7 @@ set(COMMON_INC
         )
 
 file(GLOB COMMON
-        ${CMAKE_CURRENT_BINARY_DIR}/proto/*.pb.*
+        # ${CMAKE_CURRENT_BINARY_DIR}/proto/*.pb.*
         src/common/*.cpp
         ${ENGINE}
         ${EXEC}
@@ -435,13 +435,13 @@ file(GLOB COMMON
         ${LOGICAL_PLAN}
         ${MEM_ROW}
         ${PHYSICAL_PLAN}
-        ${PROTOCOL}
         ${RAFT}
         ${RAFT_META}
         ${REVERSE}
         ${RUNTIME}
         ${SESSION}
         ${SQLPARSER}
+        ${PROTOCOL}
         ${STORE}
         )
 

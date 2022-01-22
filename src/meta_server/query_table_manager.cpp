@@ -18,8 +18,8 @@
 #include "region_manager.h"
 #include "ddl_manager.h"
 #include <unordered_set>
+DECLARE_int64(show_table_status_cache_time);
 
-DEFINE_int64(show_table_status_cache_time, 3600 * 1000 * 1000LL, "show table status cache time : 3600s");
 namespace baikaldb {
 void QueryTableManager::get_schema_info(const pb::QueryRequest* request,
         pb::QueryResponse* response) {

@@ -19,12 +19,13 @@
 namespace baikaldb {
 DECLARE_string(meta_server_bns);
 DECLARE_int32(meta_replica_number);
+DECLARE_int32(snapshot_interval_s);
+DECLARE_int32(election_timeout_ms);
+DECLARE_string(stable_uri);
+DECLARE_string(snapshot_uri);
 
-DEFINE_int32(snapshot_interval_s, 600, "raft snapshot interval(s)");
-DEFINE_int32(election_timeout_ms, 1000, "raft election timeout(ms)");
+
 DEFINE_string(log_uri, "myraftlog://my_raft_log?id=", "raft log uri");
-DEFINE_string(stable_uri, "local://./raft_data/stable", "raft stable path");
-DEFINE_string(snapshot_uri, "local://./raft_data/snapshot", "raft snapshot path");
 DEFINE_int64(check_migrate_interval_us, 60 * 1000 * 1000LL, "check meta server migrate interval (60s)");
 
 void MetaServerClosure::Run() {

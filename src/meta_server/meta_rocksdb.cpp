@@ -16,7 +16,8 @@
 #include "gflags/gflags.h"
 
 namespace baikaldb {
-DEFINE_string(db_path, "./rocks_db", "rocks db path");
+DECLARE_string(db_path);
+
 int MetaRocksdb::init() {
     _rocksdb = RocksWrapper::get_instance();
     if (!_rocksdb) {
